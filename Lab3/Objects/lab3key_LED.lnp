@@ -1,0 +1,16 @@
+--cpu Cortex-M3
+".\objects\main.o"
+".\objects\key.o"
+".\objects\led.o"
+".\objects\delay.o"
+".\objects\sys.o"
+".\objects\misc_1.o"
+".\objects\stm32f10x_gpio_1.o"
+".\objects\stm32f10x_rcc_1.o"
+".\objects\gpio_stm32f10x.o"
+".\objects\startup_stm32f10x_hd.o"
+".\objects\system_stm32f10x.o"
+--strict --scatter ".\Objects\lab3key_LED.sct"
+--summary_stderr --info summarysizes --map --xref --callgraph --symbols
+--info sizes --info totals --info unused --info veneers
+--list ".\Listings\lab3key_LED.map" -o .\Objects\lab3key_LED.axf
