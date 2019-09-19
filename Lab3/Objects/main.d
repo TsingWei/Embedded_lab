@@ -32,3 +32,4 @@
 .\objects\main.o: .\STM32F10x_FWLib\inc\misc.h
 .\objects\main.o: .\SYSTEM\delay\delay.h
 .\objects\main.o: .\HARDWARE\KEY\key.h
+.\objects\main.o: .\HARDWARE\TIMER\timer.h
