@@ -1,6 +1,7 @@
 #include "led.h"
 #include "delay.h"
 #include "sys.h"
+#include "key.h"
 #include "usart.h"
 #include "string.h"
 
@@ -23,7 +24,7 @@ void LED_Control(const char *recv){
 	else
 		_control = 0;
 	if(_control)
-		printf("\r\n%s!", recv);
+		printf("%s!", recv);
 	else
 		printf("Hello, %s", recv);
 }
@@ -32,16 +33,32 @@ int main(void)
 {
 	u8 t;
 	u8 len;
-	u16 times = 0;
 	char recv[20];
 
 	LED_Init();
+	KEY_Init();
 	delay_init();
 	NVIC_PriorityGroupConfig(NVIC_PriorityGroup_2);
 	uart_init(9600);
 
 	while (1)
 	{
+		t=KEY_Scan(0);		//得到键值
+		switch(t)
+		{				 
+			case KEY0_PRES:
+				printf("KEY0 pressed!\r\n");
+				break;
+			case KEY1_PRES:
+				printf("KEY1 pressed!\r\n");
+				break;
+			case WKUP_PRES:				
+				printf("WK_UP pressed!\r\n");
+				break;
+			default:
+				delay_ms(20);
+				break;
+		}
 		if (USART_RX_STA & 0x8000)
 		{
 			len = USART_RX_STA & 0x3fff;
@@ -53,9 +70,10 @@ int main(void)
 			}
 			recv[t] = '\0'; // 在字符串末尾拼接 '\0'
 			LED_Control(recv);
-			printf("\r\n\r\n");
 			USART_RX_STA = 0;
 		}
+
+		
 		// else
 		// {
 		// 	times++;
