@@ -8,22 +8,25 @@
 
 void status_1()
 {
-	LED0 = 0;
+	LED0 = 1;
 	LED1 = 1;
-	Reset_Blink();
+	Reset_Blink(1);
+	Set_Blink(0);
 }
 
 void status_2()
 {
 	LED0 = 1;
 	LED1 = 0;
-	Reset_Blink();
+	Reset_Blink(0);
+	Reset_Blink(1);
 }
 void status_3()
 {
 	LED0 = 1;
 	LED1 = 0;
-	Set_Blink();
+	Set_Blink(0);
+	Set_Blink(1);
 }
 
  int main(void)
@@ -35,6 +38,7 @@ void status_3()
 											//点亮LED
 	NVIC_PriorityGroupConfig(NVIC_PriorityGroup_2);// 设置中断优先级分组2
 	TIM3_Int_Init(999,7199);//10Khz的计数频率，计数到5000为500ms   
+	TIM2_Int_Init(4999,7199);//10Khz的计数频率，计数到5000为500ms 
 	while(1)
 	{
 		t=KEY_Scan(0);		//得到键值

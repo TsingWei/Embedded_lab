@@ -16,6 +16,7 @@
 
 
 void TIM3_Int_Init(u16 arr,u16 psc); 
-void Set_Blink(void);
-void Reset_Blink(void);
+void TIM2_Int_Init(u16 arr,u16 psc); 
+void Set_Blink(int);
+void Reset_Blink(int);
 #endif
