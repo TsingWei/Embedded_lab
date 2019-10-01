@@ -565,14 +565,14 @@ ARM Macro Assembler    Page 9
               00000000 
 Command Line: --debug --xref --diag_suppress=9931 --cpu=Cortex-M3 --apcs=interw
 ork --depend=.\objects\startup_stm32f10x_hd.d -o.\objects\startup_stm32f10x_hd.
-o -IC:\Users\User\Desktop\Embedded\Lab4\RTE -IC:\Users\User\Desktop\Embedded\La
-b4\RTE\Device\STM32F103RC -IC:\Keil_v5\ARM\PACK\ARM\CMSIS\4.2.0\CMSIS\Include -
-IC:\Keil_v5\ARM\PACK\Keil\STM32F1xx_DFP\2.2.0 -IC:\Keil_v5\ARM\PACK\Keil\STM32F
-1xx_DFP\2.2.0\Device\Include -IC:\Keil_v5\ARM\PACK\Keil\STM32F1xx_DFP\2.2.0\Dev
-ice\StdPeriph_Driver\inc -IC:\Keil_v5\ARM\PACK\Keil\STM32F1xx_DFP\2.2.0\RTE_Dri
-ver --predefine="__UVISION_VERSION SETA 514" --predefine="_RTE_ SETA 1" --prede
-fine="STM32F10X_HD SETA 1" --list=.\listings\startup_stm32f10x_hd.lst RTE\Devic
-e\STM32F103RC\startup_stm32f10x_hd.s
+o -IC:\Users\Administrator\Desktop\Embedded\Lab4\RTE -IC:\Users\Administrator\D
+esktop\Embedded\Lab4\RTE\Device\STM32F103RC -IC:\Keil_v5\ARM\PACK\ARM\CMSIS\4.2
+.0\CMSIS\Include -IC:\Keil_v5\ARM\PACK\Keil\STM32F1xx_DFP\2.2.0 -IC:\Keil_v5\AR
+M\PACK\Keil\STM32F1xx_DFP\2.2.0\Device\Include -IC:\Keil_v5\ARM\PACK\Keil\STM32
+F1xx_DFP\2.2.0\Device\StdPeriph_Driver\inc -IC:\Keil_v5\ARM\PACK\Keil\STM32F1xx
+_DFP\2.2.0\RTE_Driver --predefine="__UVISION_VERSION SETA 514" --predefine="_RT
+E_ SETA 1" --predefine="STM32F10X_HD SETA 1" --list=.\listings\startup_stm32f10
+x_hd.lst RTE\Device\STM32F103RC\startup_stm32f10x_hd.s
 
 
 
