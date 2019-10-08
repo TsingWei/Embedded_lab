@@ -1,0 +1,110 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <meta http-equiv="Content-Style-Type" content="text/css" />
+    <meta name="viewport" content="width=device-width">
+    <title>&#26032;&#39029;&#38754;.html</title>
+    <link href="/library/skin/tool_base.css" type="text/css" rel="stylesheet" media="all" />
+    <link href="/library/skin/morpheus-default/tool.css" type="text/css" rel="stylesheet" media="all" />
+    <script type="text/javascript" src="/library/js/headscripts.js"></script>
+    <style>
+        body {
+            padding: 5px !important;
+        }
+    </style>
+</head>
+
+<body>
+    <meta http-equiv="Content-type" content="text/html;charset=UTF-8">
+    <title></title>
+    <link href="https://cdn.jsdelivr.net/gh/Microsoft/vscode/extensions/markdown-language-features/media/markdown.css"
+        rel="stylesheet" />
+    <link href="https://cdn.jsdelivr.net/gh/Microsoft/vscode/extensions/markdown-language-features/media/highlight.css"
+        rel="stylesheet" />
+    <style type="text/css">
+        .task-list-item {
+            list-style-type: none;
+        }
+
+        .task-list-item-checkbox {
+            margin-left: -20px;
+            vertical-align: middle;
+        }
+    </style>
+    <style type="text/css">
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe WPC', 'Segoe UI', 'Ubuntu', 'Droid Sans', sans-serif;
+            font-size: 14px;
+            line-height: 1.6;
+        }
+    </style>
+    <style type="text/css">
+    </style>
+    <h1 id="%e5%ae%9e%e9%aa%8c4%e4%b8%b2%e5%8f%a3%e5%ae%9e%e9%aa%8c">实验4：串口实验</h1>
+
+    <p>11610101 韦青茂</p>
+
+    <h2 id="%e5%ae%9e%e9%aa%8c%e5%99%a8%e6%9d%90">实验器材</h2>
+
+    <ul>
+        <li>硬件：ARM-STM32开发板，J-Link/St-Link。</li>
+        <li>软件：Win7/Win8/Win10, Keil uVision5</li>
+    </ul>
+
+    <h2 id="%e5%ae%9e%e9%aa%8c%e8%a6%81%e6%b1%82">实验要求</h2>
+
+    <ol>
+        <li>
+            <p>归纳总结创建工程过程中遇到的问题以及解决方法。</p>
+        </li>
+        <li>
+            <p>功能 1 实现：从串口调试助手输入自己的姓名，返回&ldquo;Hello，xxx&rdquo;。</p>
+        </li>
+    </ol>
+
+    <h2 id="%e5%ae%9e%e9%aa%8c%e8%bf%87%e7%a8%8b">实验过程</h2>
+
+    <h3 id="%e8%bd%af%e4%bb%b6%e4%bb%a3%e7%a0%81mainc">软件代码(main.c)</h3>
+
+    <pre>
+
+&nbsp;</pre>
+
+    <div><code
+            class="language-c">
+            <span class="hljs-meta">#<span class="hljs-meta-keyword">include</span> <span class="hljs-meta-string">&quot;led.h&quot;
+                
+            </span></span> <span class="hljs-meta">#<span class="hljs-meta-keyword">include</span> <span class="hljs-meta-string">&quot;delay.h&quot;</span></span> <span class="hljs-meta">#<span class="hljs-meta-keyword">include</span> <span class="hljs-meta-string">&quot;sys.h&quot;</span></span> <span class="hljs-meta">#<span class="hljs-meta-keyword">include</span> <span class="hljs-meta-string">&quot;key.h&quot;</span></span> <span class="hljs-meta">#<span class="hljs-meta-keyword">include</span> <span class="hljs-meta-string">&quot;usart.h&quot;</span></span> <span class="hljs-meta">#<span class="hljs-meta-keyword">include</span> <span class="hljs-meta-string">&quot;string.h&quot;</span></span> <span class="hljs-comment">// 判断串口读入字符串来控制LED灯</span> <span class="hljs-function"><span class="hljs-keyword">void</span> <span class="hljs-title">LED_Control</span><span class="hljs-params">(<span class="hljs-keyword">const</span> <span class="hljs-keyword">char</span> *recv)</span> </span>{ <span class="hljs-keyword">const</span> <span class="hljs-keyword">char</span> *l0_on = <span class="hljs-string">&quot;led0 on&quot;</span>; <span class="hljs-keyword">const</span> <span class="hljs-keyword">char</span> *l0_off = <span class="hljs-string">&quot;led0 off&quot;</span>; <span class="hljs-keyword">const</span> <span class="hljs-keyword">char</span> *l1_on = <span class="hljs-string">&quot;led1 on&quot;</span>; <span class="hljs-keyword">const</span> <span class="hljs-keyword">char</span> *l1_off = <span class="hljs-string">&quot;led1 off&quot;</span>; <span class="hljs-keyword">int</span> _control = <span class="hljs-number">1</span>; <span class="hljs-keyword">if</span> (<span class="hljs-built_in">strcmp</span>(recv, l0_on) == <span class="hljs-number">0</span>) LED0 = <span class="hljs-number">0</span>; <span class="hljs-keyword">else</span> <span class="hljs-keyword">if</span> (<span class="hljs-built_in">strcmp</span>(recv, l0_off) == <span class="hljs-number">0</span>) LED0 = <span class="hljs-number">1</span>; <span class="hljs-keyword">else</span> <span class="hljs-keyword">if</span> (<span class="hljs-built_in">strcmp</span>(recv, l1_on) == <span class="hljs-number">0</span>) LED1 = <span class="hljs-number">0</span>; <span class="hljs-keyword">else</span> <span class="hljs-keyword">if</span> (<span class="hljs-built_in">strcmp</span>(recv, l1_off) == <span class="hljs-number">0</span>) LED1 = <span class="hljs-number">1</span>; <span class="hljs-keyword">else</span> _control = <span class="hljs-number">0</span>; <span class="hljs-keyword">if</span> (_control) <span class="hljs-built_in">printf</span>(<span class="hljs-string">&quot;%s!&quot;</span>, recv); <span class="hljs-keyword">else</span> <span class="hljs-built_in">printf</span>(<span class="hljs-string">&quot;Hello, %s&quot;</span>, recv); } <span class="hljs-function"><span class="hljs-keyword">int</span> <span class="hljs-title">main</span><span class="hljs-params">(<span class="hljs-keyword">void</span>)</span> </span>{ u8 t; u8 len; <span class="hljs-keyword">char</span> recv[<span class="hljs-number">20</span>]; LED_Init(); KEY_Init(); delay_init(); NVIC_PriorityGroupConfig(NVIC_PriorityGroup_2); uart_init(<span class="hljs-number">9600</span>); <span class="hljs-keyword">while</span> (<span class="hljs-number">1</span>) { t = KEY_Scan(<span class="hljs-number">0</span>); <span class="hljs-comment">//得到键值</span> <span class="hljs-keyword">switch</span> (t) { <span class="hljs-keyword">case</span> KEY0_PRES: <span class="hljs-built_in">printf</span>(<span class="hljs-string">&quot;KEY0 pressed!\r\n&quot;</span>); <span class="hljs-keyword">break</span>; <span class="hljs-keyword">case</span> KEY1_PRES: <span class="hljs-built_in">printf</span>(<span class="hljs-string">&quot;KEY1 pressed!\r\n&quot;</span>); <span class="hljs-keyword">break</span>; <span class="hljs-keyword">case</span> WKUP_PRES: <span class="hljs-built_in">printf</span>(<span class="hljs-string">&quot;WK_UP pressed!\r\n&quot;</span>); <span class="hljs-keyword">break</span>; <span class="hljs-keyword">default</span>: delay_ms(<span class="hljs-number">20</span>); <span class="hljs-keyword">break</span>; } <span class="hljs-keyword">if</span> (USART_RX_STA &amp; <span class="hljs-number">0x8000</span>) { len = USART_RX_STA &amp; <span class="hljs-number">0x3fff</span>; <span class="hljs-keyword">for</span> (t = <span class="hljs-number">0</span>; t &lt; len; t++) { recv[t] = USART_RX_BUF[t]; <span class="hljs-comment">// 接收到的字符串逐字符存入recv中</span> <span class="hljs-keyword">while</span> ((USART1-&gt;SR &amp; <span class="hljs-number">0X40</span>) == <span class="hljs-number">0</span>) ; } recv[t] = <span class="hljs-string">&#39;\0&#39;</span>; <span class="hljs-comment">// 在字符串末尾拼接 &#39;\0&#39;</span> LED_Control(recv); USART_RX_STA = <span class="hljs-number">0</span>; } } } </code>
+    </div>
+
+    <h3 id="%e4%b8%b2%e5%8f%a3%e5%ae%9e%e9%aa%8c">串口实验：</h3>
+
+    <p>实现echo功能: <img alt="serial" src="file:///C:/Users/User/Desktop/Embedded/lab4/serial.png" /></p>
+
+    <h2 id="%e9%81%87%e5%88%b0%e7%9a%84%e9%97%ae%e9%a2%98%e5%8f%8a%e8%a7%a3%e5%86%b3%e6%96%b9%e6%b3%95">遇到的问题及解决方法</h2>
+
+    <h3
+        id="1-%e4%b8%b2%e5%8f%a3%e6%89%93%e5%8d%b0%e8%bf%94%e5%9b%9e%e5%ad%97%e7%ac%a6%e4%b8%b2%e6%97%b6%e5%ad%97%e7%ac%a6%e4%b8%b2%e6%9c%80%e5%90%8e%e6%9c%89%e6%97%b6%e8%8e%ab%e5%90%8d%e5%85%b6%e5%a6%99%e5%a4%9a%e5%87%ba%e4%b8%80%e4%b8%aa%e5%a5%87%e6%80%aa%e5%ad%97%e7%ac%a6">
+        1. 串口打印返回字符串时，字符串最后有时莫名其妙多出一个奇怪字符</h3>
+
+    <p>可能是因为储存用来打印的字符串变量每次用之前没有清空，于是在末尾添加&#39;\0&#39;</p>
+
+    <pre>
+
+&nbsp;</pre>
+
+    <div><code
+            class="language-c">recv[t] = <span class="hljs-string">&#39;\0&#39;</span>; <span class="hljs-comment">// 在字符串末尾拼接 &#39;\0&#39;</span> </code>
+    </div>
+
+    <p>这样打印该字符串时就会以这个手动添加的&#39;\0&#39;作为结束符</p>
+
+    <h3 id="2-%e8%af%95%e5%9b%be%e6%89%93%e5%8d%b0%e4%b8%ad%e6%96%87%e6%97%b6%e5%87%ba%e7%8e%b0%e4%b9%b1%e7%a0%81">2.
+        试图打印中文时，出现乱码</h3>
+
+    <p>经过试验发现，MDK编辑器和串口监视终端编码一致时才能显示正常中文，而之前在mdk里设置编码为utf8，但是串口终端还是GB2132，所以才会显示乱码，改成一致的即可显示正常。</p>
+
+</body>
+
+</html>
