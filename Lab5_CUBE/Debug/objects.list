@@ -19,5 +19,6 @@
 "Src/syscalls.o"
 "Src/sysmem.o"
 "Src/system_stm32f1xx.o"
+"Src/tim.o"
 "Src/usart.o"
 "Startup/startup_stm32f103rctx.o"
