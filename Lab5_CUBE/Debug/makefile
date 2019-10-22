@@ -41,8 +41,8 @@ all:
 main-build: Lab5.elf secondary-outputs
 
 # Tool invocations
-Lab5.elf: $(OBJS) $(USER_OBJS) C:\Users\User\STM32CubeIDE\workspace_1.0.2\Lab5\STM32F103RCTX_FLASH.ld
-	arm-none-eabi-gcc -o "Lab5.elf" @"objects.list" $(USER_OBJS) $(LIBS) -mcpu=cortex-m3 -T"C:\Users\User\STM32CubeIDE\workspace_1.0.2\Lab5\STM32F103RCTX_FLASH.ld" --specs=nosys.specs -Wl,-Map="Lab5.map" -Wl,--gc-sections -static --specs=nano.specs -mfloat-abi=soft -mthumb -Wl,--start-group -lc -lm -Wl,--end-group
+Lab5.elf: $(OBJS) $(USER_OBJS) C:\Users\User\Desktop\Embedded\Lab5_CUBE\STM32F103RCTX_FLASH.ld
+	arm-none-eabi-gcc -o "Lab5.elf" @"objects.list" $(USER_OBJS) $(LIBS) -mcpu=cortex-m3 -T"C:\Users\User\Desktop\Embedded\Lab5_CUBE\STM32F103RCTX_FLASH.ld" --specs=nosys.specs -Wl,-Map="Lab5.map" -Wl,--gc-sections -static --specs=nano.specs -mfloat-abi=soft -mthumb -Wl,--start-group -lc -lm -Wl,--end-group
 	@echo 'Finished building target: $@'
 	@echo ' '
 
