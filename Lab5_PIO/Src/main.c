@@ -107,7 +107,7 @@ int main(void)
   /* USER CODE BEGIN 2 */
   //printf("Hello\n");
   uint16_t raw;
-  char msg[20];
+  float temprature,voltage;
 
   /* USER CODE END 2 */
 
@@ -127,8 +127,12 @@ int main(void)
     /* USER CODE END WHILE */
 
     /* USER CODE BEGIN 3 */
-    printf("%f\n\r", value);
-    HAL_Delay(100);
+    voltage = (float)raw/0x1000f;
+    temprature =  ((1.43 - voltage) / 4.3) + 25;
+    printf("Ori val = %d.\n\r",raw);
+    printf("Voltage = %f.\n\r",voltage);
+    printf("Temprature = %f.\n\r\n\r",temprature);
+    HAL_Delay(1000);
   }
   /* USER CODE END 3 */
 }
