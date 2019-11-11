@@ -27,6 +27,7 @@
 /* Private includes ----------------------------------------------------------*/
 /* USER CODE BEGIN Includes */
 #include "string.h"
+#include "stdio.h"
 /* USER CODE END Includes */
 
 /* Private typedef -----------------------------------------------------------*/
@@ -50,25 +51,27 @@ uint16_t Size);
 /* USER CODE BEGIN PV */
 uint8_t rxBuffer[20];
 extern UART_HandleTypeDef huart1;
-extern TIM_HandleTypeDef htim3;
- uint8_t key0Pressed[] = "Key 0 pressed.\n";
- uint8_t key1Pressed[] = "Key 1 pressed.\n";
- uint8_t tim3Elapsed[] = "tim3.\n";
+extern TIM_HandleTypeDef htim1;
  char textForIRQ[] = "interrupt";
  uint16_t dutyCycle = 0;
+uint32_t ccc = 1;
 /* USER CODE END PV */
 
 /* Private function prototypes -----------------------------------------------*/
 void SystemClock_Config(void);
 /* USER CODE BEGIN PFP */
-void BlinkLed0();
-void BlinkLed1();
+//void BlinkLed0();
+//void BlinkLed1();
 
 /* USER CODE END PFP */
 
 /* Private user code ---------------------------------------------------------*/
 /* USER CODE BEGIN 0 */
-
+//int fputc(int c, FILE *stream)    //重写fputc函数
+//{
+//    HAL_UART_Transmit(&huart1, (unsigned char *)&c, 1, 1000);
+//    return 1;
+//}
 /* USER CODE END 0 */
 
 /**
@@ -95,17 +98,21 @@ int main(void)
   SystemClock_Config();
 
   /* USER CODE BEGIN SysInit */
-//  HAL_TIM_PWM_Start(&htim3,TIM_CHANNEL_2);
   /* USER CODE END SysInit */
 
   /* Initialize all configured peripherals */
   MX_GPIO_Init();
   MX_USART1_UART_Init();
+  MX_TIM1_Init();
   MX_TIM3_Init();
   /* USER CODE BEGIN 2 */
-  HAL_UART_Receive_IT(&huart1, (uint8_t *)rxBuffer, 1);
-  HAL_TIM_Base_Start_IT(&htim3);
+//  HAL_UART_Receive_IT(&huart1, (uint8_t *)rxBuffer, 1);
+//  HAL_TIM_Base_Start_IT(&htim3);
+  HAL_TIM_Base_Start_IT(&htim1);
+  HAL_TIM_PWM_Start(&htim1,TIM_CHANNEL_1);
+  HAL_TIM_OC_Start_IT  ( &htim1,  TIM_CHANNEL_2);
 
+//  TIM1->CCR1 = 0xFFF;
   /* USER CODE END 2 */
 
   /* Infinite loop */
@@ -113,18 +120,18 @@ int main(void)
   while (1)
   {
 //	  while (dutyCycle < 1000)
-//	  	  {
-//	  		  dutyCycle ++;
-//	  		  TIM3->CCR2 = dutyCycle;
-//	  		  HAL_Delay(1);
-//	  	  }
-//	  	  while (dutyCycle)
-//	  	  {
-//	  		  dutyCycle --;
-//	  		  TIM3->CCR2 = dutyCycle;
-//	  		  HAL_Delay(1);
-//	  	  }
-//	  	  HAL_Delay(200);
+//	  {
+//		  TIM1->CCR1 = 1000;
+		  HAL_Delay(500);
+		  printf("Hello\r\n");
+
+//	  }
+//	  while (dutyCycle>0)
+//	  {
+//		  TIM1->CCR2 = --dutyCycle;
+//		  HAL_Delay(1);
+//	  }
+//	  HAL_Delay(200);
     /* USER CODE END WHILE */
 
     /* USER CODE BEGIN 3 */
@@ -172,82 +179,68 @@ void SystemClock_Config(void)
 /* USER CODE BEGIN 4 */
 void HAL_GPIO_EXTI_Callback(uint16_t GPIO_Pin)
 {
-	 HAL_Delay(100);
-	 switch (GPIO_Pin) {
-	 case KEY0_Pin:
-		 HAL_Delay(10);
-		 if (HAL_GPIO_ReadPin(KEY0_GPIO_Port, KEY0_Pin) == GPIO_PIN_RESET) {
-			 HAL_UART_Transmit(&huart1, key0Pressed, 16, 0xffff);
-			 BlinkLed0();
-		 }
-		 break;
-	 case KEY1_Pin:
-		 HAL_Delay(10);
-		 if (HAL_GPIO_ReadPin(KEY1_GPIO_Port, KEY1_Pin) == GPIO_PIN_RESET) {
-			 HAL_UART_Transmit(&huart1, key1Pressed, 16, 0xffff);
-			 BlinkLed1();
-		 }
-		 break;
-	 case KEY_WK_Pin:
-		 HAL_Delay(10);
-		 if (HAL_GPIO_ReadPin(KEY_WK_GPIO_Port, KEY_WK_Pin) == GPIO_PIN_SET) {
-			 HAL_GPIO_TogglePin(LED0_GPIO_Port, LED0_Pin);
-			 HAL_GPIO_TogglePin(LED1_GPIO_Port, LED1_Pin);
-		 }
-		 break;
-	 default:
-		 break;
-
-	 }
+//	 HAL_Delay(100);
+//	 switch (GPIO_Pin) {
+//	 case KEY0_Pin:
+//		 HAL_Delay(10);
+//		 if (HAL_GPIO_ReadPin(KEY0_GPIO_Port, KEY0_Pin) == GPIO_PIN_RESET) {
+//			 HAL_UART_Transmit(&huart1, key0Pressed, 16, 0xffff);
+//			 BlinkLed0();
+//		 }
+//		 break;
+//	 case KEY1_Pin:
+//		 HAL_Delay(10);
+//		 if (HAL_GPIO_ReadPin(KEY1_GPIO_Port, KEY1_Pin) == GPIO_PIN_RESET) {
+//			 HAL_UART_Transmit(&huart1, key1Pressed, 16, 0xffff);
+//			 BlinkLed1();
+//		 }
+//		 break;
+//	 case KEY_WK_Pin:
+//		 HAL_Delay(10);
+//		 if (HAL_GPIO_ReadPin(KEY_WK_GPIO_Port, KEY_WK_Pin) == GPIO_PIN_SET) {
+//			 HAL_GPIO_TogglePin(LED0_GPIO_Port, LED0_Pin);
+//			 HAL_GPIO_TogglePin(LED1_GPIO_Port, LED1_Pin);
+//		 }
+//		 break;
+//	 default:
+//		 break;
+//
+//	 }
 }
 
 void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef *htim)
 {
-	if(htim->Instance==TIM3)
-	{
-//		HAL_UART_Transmit(&huart1, tim3Elapsed, 6, 0xffff);
-		HAL_GPIO_TogglePin(LED1_GPIO_Port, LED1_Pin);
-	}
+//	if(htim->Instance==TIM3)
+//	{
+//		rising = -rising;
+//		HAL_GPIO_TogglePin(LED1_GPIO_Port, LED1_Pin);
+//	}
+
 }
+
+void HAL_TIM_OC_DelayElapsedCallback(TIM_HandleTypeDef *htim){
+	if(htim->Instance==TIM1)
+		{
+			dutyCycle+=ccc;
+			TIM1->CCR1=dutyCycle;
+			if(dutyCycle==300){
+				dutyCycle = 300;
+				ccc = -1;
+			}
+			else if(dutyCycle<1){
+				dutyCycle = 0;
+				ccc = 1;
+			}
+		}
+
+}
+
 
 void HAL_UART_RxCpltCallback(UART_HandleTypeDef *huart)
 {
-	if(huart->Instance==USART1)
-	{
-		static uint8_t respond[] = "Got 'interrupt'.\n";
-		static char uRx_Data[1024] = {0};
-		static unsigned char uLength = 0;
-		if(rxBuffer[0] == '\n' || rxBuffer[0] == '\0')
-		{
-			uRx_Data[uLength-1] = '\0';
-			if(!strcmp(uRx_Data, textForIRQ)){
-				HAL_UART_Transmit(&huart1, respond, 17, 0xffff);
-			}
 
-			uLength = 0;
-		}
-		else
-		{
-			uRx_Data[uLength] = rxBuffer[0];
-			uLength++;
-		}
-	}
 }
 
-void BlinkLed0(){
-	HAL_GPIO_WritePin(LED0_GPIO_Port, LED0_Pin, GPIO_PIN_RESET);
-	for(int i=0;i<7;i++){
-		HAL_GPIO_TogglePin(LED0_GPIO_Port, LED0_Pin);
-		HAL_Delay(200);
-	}
-}
-void BlinkLed1(){
-	HAL_GPIO_WritePin(LED1_GPIO_Port, LED1_Pin, GPIO_PIN_RESET);
-	for(int i=0;i<7;i++){
-		HAL_GPIO_TogglePin(LED1_GPIO_Port, LED1_Pin);
-		HAL_Delay(200);
-	}
-}
 /* USER CODE END 4 */
 
 /**
