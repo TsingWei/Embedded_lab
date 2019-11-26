@@ -171,7 +171,7 @@ void MsgConsumerTask(void const *argument)
 
   /* Infinite loop */
   for (;;)
-  {
+  {   
     osDelay(110);
     sprintf(msg, "++getting++\r\n");
     HAL_UART_Transmit(&huart1, (uint8_t *)msg, strlen(msg), HAL_MAX_DELAY);
