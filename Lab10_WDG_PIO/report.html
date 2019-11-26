@@ -1,0 +1,143 @@
+<!DOCTYPE html>
+    <html>
+    <head>
+        <meta charset="UTF-8">
+        <title>实验10：使用HAL库进行看门狗实验</title>
+        
+        <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/Microsoft/vscode/extensions/markdown-language-features/media/markdown.css">
+        <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/Microsoft/vscode/extensions/markdown-language-features/media/highlight.css">
+        
+        <style>
+.task-list-item { list-style-type: none; } .task-list-item-checkbox { margin-left: -20px; vertical-align: middle; }
+</style>
+        <style>
+            body {
+                font-family: -apple-system, BlinkMacSystemFont, 'Segoe WPC', 'Segoe UI', 'Ubuntu', 'Droid Sans', sans-serif;
+                font-size: 14px;
+                line-height: 1.6;
+            }
+        </style>
+        <style>
+body{ margin: 0 auto; font-family: "Microsoft YaHei", arial,sans-serif; color: #444444; line-height: 1; padding: 30px; } @media screen and (min-width: 768px) { body { width: 748px; margin: 10px auto; } } h1, h2, h3, h4 { color: #111111; font-weight: 400; margin-top: 1em; } h1, h2, h3, h4, h5 { font-family: Georgia, Palatino, serif; } h1, h2, h3, h4, h5, p , dl{ margin-bottom: 16px; padding: 0; } h1 { font-size: 48px; line-height: 54px; } h2 { font-size: 36px; line-height: 42px; } h1, h2 { border-bottom: 1px solid #EFEAEA; padding-bottom: 10px; } h3 { font-size: 24px; line-height: 30px; } h4 { font-size: 21px; line-height: 26px; } h5 { font-size: 18px; list-style: 23px; } a { color: #0099ff; margin: 0; padding: 0; vertical-align: baseline; } a:hover { text-decoration: none; color: #ff6600; } a:visited { /*color: purple;*/ } ul, ol { padding: 0; padding-left: 24px; margin: 0; } li { line-height: 24px; } p, ul, ol { font-size: 16px; line-height: 24px; } ol ol, ul ol { list-style-type: lower-roman; } /*pre { padding: 0px 24px; max-width: 800px; white-space: pre-wrap; } code { font-family: Consolas, Monaco, Andale Mono, monospace; line-height: 1.5; font-size: 13px; }*/ code, pre { border-radius: 3px; background-color:#f7f7f7; color: inherit; } code { font-family: Consolas, Monaco, Andale Mono, monospace; margin: 0 2px; } pre { line-height: 1.7em; overflow: auto; padding: 6px 10px; border-left: 5px solid #6CE26C; } pre > code { border: 0; display: inline; max-width: initial; padding: 0; margin: 0; overflow: initial; line-height: inherit; font-size: .85em; white-space: pre; background: 0 0; } code { color: #666555; } /** markdown preview plus 对于代码块的处理有些问题, 所以使用统一的颜色 */ /*code .keyword { color: #8959a8; } code .number { color: #f5871f; } code .comment { color: #998 }*/ aside { display: block; float: right; width: 390px; } blockquote { border-left:.5em solid #eee; padding: 0 0 0 2em; margin-left:0; } blockquote cite { font-size:14px; line-height:20px; color:#bfbfbf; } blockquote cite:before { content: '\2014 \00A0'; } blockquote p { color: #666; } hr { text-align: left; color: #999; height: 2px; padding: 0; margin: 16px 0; background-color: #e7e7e7; border: 0 none; } dl { padding: 0; } dl dt { padding: 10px 0; margin-top: 16px; font-size: 1em; font-style: italic; font-weight: bold; } dl dd { padding: 0 16px; margin-bottom: 16px; } dd { margin-left: 0; } /* Code below this line is copyright Twitter Inc. */ button, input, select, textarea { font-size: 100%; margin: 0; vertical-align: baseline; *vertical-align: middle; } button, input { line-height: normal; *overflow: visible; } button::-moz-focus-inner, input::-moz-focus-inner { border: 0; padding: 0; } button, input[type="button"], input[type="reset"], input[type="submit"] { cursor: pointer; -webkit-appearance: button; } input[type=checkbox], input[type=radio] { cursor: pointer; } /* override default chrome & firefox settings */ input:not([type="image"]), textarea { -webkit-box-sizing: content-box; -moz-box-sizing: content-box; box-sizing: content-box; } input[type="search"] { -webkit-appearance: textfield; -webkit-box-sizing: content-box; -moz-box-sizing: content-box; box-sizing: content-box; } input[type="search"]::-webkit-search-decoration { -webkit-appearance: none; } label, input, select, textarea { font-family: "Helvetica Neue", Helvetica, Arial, sans-serif; font-size: 13px; font-weight: normal; line-height: normal; margin-bottom: 18px; } input[type=checkbox], input[type=radio] { cursor: pointer; margin-bottom: 0; } input[type=text], input[type=password], textarea, select { display: inline-block; width: 210px; padding: 4px; font-size: 13px; font-weight: normal; line-height: 18px; height: 18px; color: #808080; border: 1px solid #ccc; -webkit-border-radius: 3px; -moz-border-radius: 3px; border-radius: 3px; } select, input[type=file] { height: 27px; line-height: 27px; } textarea { height: auto; } /* grey out placeholders */ :-moz-placeholder { color: #bfbfbf; } ::-webkit-input-placeholder { color: #bfbfbf; } input[type=text], input[type=password], select, textarea { -webkit-transition: border linear 0.2s, box-shadow linear 0.2s; -moz-transition: border linear 0.2s, box-shadow linear 0.2s; transition: border linear 0.2s, box-shadow linear 0.2s; -webkit-box-shadow: inset 0 1px 3px rgba(0, 0, 0, 0.1); -moz-box-shadow: inset 0 1px 3px rgba(0, 0, 0, 0.1); box-shadow: inset 0 1px 3px rgba(0, 0, 0, 0.1); } input[type=text]:focus, input[type=password]:focus, textarea:focus { outline: none; border-color: rgba(82, 168, 236, 0.8); -webkit-box-shadow: inset 0 1px 3px rgba(0, 0, 0, 0.1), 0 0 8px rgba(82, 168, 236, 0.6); -moz-box-shadow: inset 0 1px 3px rgba(0, 0, 0, 0.1), 0 0 8px rgba(82, 168, 236, 0.6); box-shadow: inset 0 1px 3px rgba(0, 0, 0, 0.1), 0 0 8px rgba(82, 168, 236, 0.6); } /* buttons */ button { display: inline-block; padding: 4px 14px; font-family: "Helvetica Neue", Helvetica, Arial, sans-serif; font-size: 13px; line-height: 18px; -webkit-border-radius: 4px; -moz-border-radius: 4px; border-radius: 4px; -webkit-box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.2), 0 1px 2px rgba(0, 0, 0, 0.05); -moz-box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.2), 0 1px 2px rgba(0, 0, 0, 0.05); box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.2), 0 1px 2px rgba(0, 0, 0, 0.05); background-color: #0064cd; background-repeat: repeat-x; background-image: -khtml-gradient(linear, left top, left bottom, from(#049cdb), to(#0064cd)); background-image: -moz-linear-gradient(top, #049cdb, #0064cd); background-image: -ms-linear-gradient(top, #049cdb, #0064cd); background-image: -webkit-gradient(linear, left top, left bottom, color-stop(0%, #049cdb), color-stop(100%, #0064cd)); background-image: -webkit-linear-gradient(top, #049cdb, #0064cd); background-image: -o-linear-gradient(top, #049cdb, #0064cd); background-image: linear-gradient(top, #049cdb, #0064cd); color: #fff; text-shadow: 0 -1px 0 rgba(0, 0, 0, 0.25); border: 1px solid #004b9a; border-bottom-color: #003f81; -webkit-transition: 0.1s linear all; -moz-transition: 0.1s linear all; transition: 0.1s linear all; border-color: #0064cd #0064cd #003f81; border-color: rgba(0, 0, 0, 0.1) rgba(0, 0, 0, 0.1) rgba(0, 0, 0, 0.25); } button:hover { color: #fff; background-position: 0 -15px; text-decoration: none; } button:active { -webkit-box-shadow: inset 0 3px 7px rgba(0, 0, 0, 0.15), 0 1px 2px rgba(0, 0, 0, 0.05); -moz-box-shadow: inset 0 3px 7px rgba(0, 0, 0, 0.15), 0 1px 2px rgba(0, 0, 0, 0.05); box-shadow: inset 0 3px 7px rgba(0, 0, 0, 0.15), 0 1px 2px rgba(0, 0, 0, 0.05); } button::-moz-focus-inner { padding: 0; border: 0; } table { *border-collapse: collapse; /* IE7 and lower */ border-spacing: 0; width: 100%; } table { border: solid #ccc 1px; -moz-border-radius: 6px; -webkit-border-radius: 6px; border-radius: 6px; /*-webkit-box-shadow: 0 1px 1px #ccc; -moz-box-shadow: 0 1px 1px #ccc; box-shadow: 0 1px 1px #ccc; */ } table tr:hover { background: #fbf8e9; -o-transition: all 0.1s ease-in-out; -webkit-transition: all 0.1s ease-in-out; -moz-transition: all 0.1s ease-in-out; -ms-transition: all 0.1s ease-in-out; transition: all 0.1s ease-in-out; } table td, .table th { border-left: 1px solid #ccc; border-top: 1px solid #ccc; padding: 10px; text-align: left; } table th { background-color: #dce9f9; background-image: -webkit-gradient(linear, left top, left bottom, from(#ebf3fc), to(#dce9f9)); background-image: -webkit-linear-gradient(top, #ebf3fc, #dce9f9); background-image: -moz-linear-gradient(top, #ebf3fc, #dce9f9); background-image: -ms-linear-gradient(top, #ebf3fc, #dce9f9); background-image: -o-linear-gradient(top, #ebf3fc, #dce9f9); background-image: linear-gradient(top, #ebf3fc, #dce9f9); /*-webkit-box-shadow: 0 1px 0 rgba(255,255,255,.8) inset; -moz-box-shadow:0 1px 0 rgba(255,255,255,.8) inset; box-shadow: 0 1px 0 rgba(255,255,255,.8) inset;*/ border-top: none; text-shadow: 0 1px 0 rgba(255,255,255,.5); padding: 5px; } table td:first-child, table th:first-child { border-left: none; } table th:first-child { -moz-border-radius: 6px 0 0 0; -webkit-border-radius: 6px 0 0 0; border-radius: 6px 0 0 0; } table th:last-child { -moz-border-radius: 0 6px 0 0; -webkit-border-radius: 0 6px 0 0; border-radius: 0 6px 0 0; } table th:only-child{ -moz-border-radius: 6px 6px 0 0; -webkit-border-radius: 6px 6px 0 0; border-radius: 6px 6px 0 0; } table tr:last-child td:first-child { -moz-border-radius: 0 0 0 6px; -webkit-border-radius: 0 0 0 6px; border-radius: 0 0 0 6px; } table tr:last-child td:last-child { -moz-border-radius: 0 0 6px 0; -webkit-border-radius: 0 0 6px 0; border-radius: 0 0 6px 0; }
+</style>
+        
+    </head>
+    <body class="vscode-light">
+        <h1 id="%e5%ae%9e%e9%aa%8c10%e4%bd%bf%e7%94%a8hal%e5%ba%93%e8%bf%9b%e8%a1%8c%e7%9c%8b%e9%97%a8%e7%8b%97%e5%ae%9e%e9%aa%8c">实验10：使用HAL库进行看门狗实验</h1>
+<p>11610101 韦青茂</p>
+<h2 id="%e5%ae%9e%e9%aa%8c%e5%99%a8%e6%9d%90">实验器材</h2>
+<ul>
+<li>硬件：ARM-STM32开发板，ST-Link。</li>
+<li>软件：Win7/Win8/Win10, CubeMX, PlatformIO via VSCode</li>
+</ul>
+<h2 id="%e5%ae%9e%e9%aa%8c%e8%a6%81%e6%b1%82">实验要求</h2>
+<ol>
+<li>Use the ADC to get the measurement of internal temperature sensor(practice of the last lab)</li>
+<li>Use KEY1 to refresh the WWDG and output the corresponding data when the early wakeup interrupt is
+triggered.</li>
+</ol>
+<h2 id="%e5%ae%9e%e9%aa%8c%e8%bf%87%e7%a8%8b">实验过程</h2>
+<h3 id="%e9%85%8d%e7%bd%ae">配置</h3>
+<ol>
+<li>时钟设置. AHB2速度很低, 使得WWDG的窗口长到人类可以操作. ADC的速度也低了, 延长采样时间,使得采样更准确.
+<img src="file:///C:/Users/User/Desktop/Embedded/Lab10_WDG_PIO/Img/1.jpg" alt="mx1"></li>
+<li>WWDG配置, 窗口值和重装值都设为最大值(已经和IWDG没什么区别了)<br>
+<img src="file:///C:/Users/User/Desktop/Embedded/Lab10_WDG_PIO/Img/2.jpg" alt="mx2"></li>
+</ol>
+<h3 id="%e8%bd%af%e4%bb%b6%e4%bb%a3%e7%a0%81mainc">软件代码(main.c)</h3>
+<pre><code class="language-c"><div>
+<span class="hljs-comment">/* USER CODE BEGIN PV */</span>
+<span class="hljs-comment">// 引入外部变量</span>
+<span class="hljs-keyword">extern</span> UART_HandleTypeDef huart1;
+<span class="hljs-keyword">extern</span> WWDG_HandleTypeDef hwwdg;
+<span class="hljs-keyword">extern</span> ADC_HandleTypeDef hadc1;
+<span class="hljs-comment">// 在静态区域为变量申请空间</span>
+<span class="hljs-keyword">int</span> raw;
+<span class="hljs-keyword">float</span> voltage;
+<span class="hljs-keyword">float</span> temprature;
+<span class="hljs-comment">/* USER CODE END PV */</span>
+</div></code></pre>
+<pre><code class="language-c"><div><span class="hljs-comment">/* USER CODE BEGIN PFP */</span>
+<span class="hljs-comment">// 检测stdio.h文件的putchar函数原型,使其能被正确重载</span>
+<span class="hljs-meta">#<span class="hljs-meta-keyword">ifdef</span> __GNUC__</span>
+<span class="hljs-meta">#<span class="hljs-meta-keyword">define</span> PUTCHAR_PROTO int __io_putchar(int ch)</span>
+<span class="hljs-meta">#<span class="hljs-meta-keyword">else</span></span>
+<span class="hljs-meta">#<span class="hljs-meta-keyword">define</span> PUTCHAR_PROTO int fputc(int ch, FILE *f)</span>
+<span class="hljs-meta">#<span class="hljs-meta-keyword">endif</span> </span>
+
+<span class="hljs-comment">/* USER CODE END PFP */</span>
+
+<span class="hljs-comment">/* Private user code ---------------------------------------------------------*/</span>
+<span class="hljs-comment">/* USER CODE BEGIN 0 */</span>
+<span class="hljs-comment">// 重写fputc函数,使其能在串口打印</span>
+PUTCHAR_PROTO 
+{
+  HAL_UART_Transmit(&amp;huart1, (<span class="hljs-keyword">uint8_t</span> *)&amp;ch, <span class="hljs-number">1</span>, <span class="hljs-number">0xffff</span>);
+  <span class="hljs-keyword">return</span> ch;
+}
+<span class="hljs-comment">/* USER CODE END 0 */</span>
+</div></code></pre>
+<pre><code class="language-c"><div><span class="hljs-function"><span class="hljs-keyword">int</span> <span class="hljs-title">main</span><span class="hljs-params">(<span class="hljs-keyword">void</span>)</span>
+</span>{
+  ...
+  <span class="hljs-comment">/* USER CODE BEGIN 2 */</span>
+  <span class="hljs-comment">// 点亮LED0 100ms后熄灭, 用以指示是否刚刚开机(复位)</span>
+  HAL_GPIO_WritePin(LED0_GPIO_Port, LED0_Pin, GPIO_PIN_RESET);
+  HAL_Delay(<span class="hljs-number">100</span>);
+  HAL_GPIO_WritePin(LED0_GPIO_Port, LED0_Pin, GPIO_PIN_SET);
+  <span class="hljs-comment">/* USER CODE END 2 */</span>
+
+  <span class="hljs-comment">// 开启ADC1</span>
+  HAL_ADC_Start(&amp;hadc1);
+  <span class="hljs-keyword">while</span> (<span class="hljs-number">1</span>)
+  {
+    HAL_Delay(<span class="hljs-number">10</span>);
+    <span class="hljs-comment">// 使用ADC1的连续采样模式</span>
+    HAL_ADC_PollForConversion(&amp;hadc1, HAL_MAX_DELAY);
+    raw = HAL_ADC_GetValue(&amp;hadc1);
+    voltage = raw * <span class="hljs-number">3300</span> / <span class="hljs-number">4096.0</span>;
+    temprature = (<span class="hljs-number">1430</span> - voltage) / <span class="hljs-number">43.0</span> + <span class="hljs-number">25.0</span>;
+  }
+}
+</div></code></pre>
+<pre><code class="language-c"><div><span class="hljs-function"><span class="hljs-keyword">void</span> <span class="hljs-title">HAL_GPIO_EXTI_Callback</span><span class="hljs-params">(<span class="hljs-keyword">uint16_t</span> GPIO_Pin)</span>
+</span>{
+  <span class="hljs-keyword">switch</span> (GPIO_Pin)
+  {
+  <span class="hljs-keyword">case</span> KEY1_Pin:
+    <span class="hljs-keyword">if</span> (HAL_GPIO_ReadPin(KEY1_GPIO_Port, KEY1_Pin) == GPIO_PIN_RESET)
+    {
+      <span class="hljs-comment">// 重设WWDG计数值</span>
+      HAL_WWDG_Refresh(&amp;hwwdg);
+      <span class="hljs-comment">// 打印对应的信息</span>
+      <span class="hljs-built_in">printf</span>(<span class="hljs-string">"\r\n=====WWDG refresh.=====\r\n"</span>);
+    }
+    <span class="hljs-keyword">break</span>;
+  <span class="hljs-keyword">default</span>:
+    <span class="hljs-keyword">break</span>;
+  }
+}
+<span class="hljs-function"><span class="hljs-keyword">void</span> <span class="hljs-title">HAL_WWDG_EarlyWakeupCallback</span><span class="hljs-params">(WWDG_HandleTypeDef *hwwdg)</span>
+</span>{
+  <span class="hljs-comment">// 翻转LED1以指示是否进入该中断</span>
+  HAL_GPIO_TogglePin(LED1_GPIO_Port, LED1_Pin);
+  <span class="hljs-comment">// 串口输出温度值</span>
+  <span class="hljs-built_in">printf</span>(<span class="hljs-string">"T = %f\r\n"</span>, temprature);
+}
+</div></code></pre>
+<h3 id="%e4%b8%b2%e5%8f%a3%e5%ae%9e%e9%aa%8c">串口实验：</h3>
+<p>打印温度值:
+<img src="file:///C:/Users/User/Desktop/Embedded/Lab10_WDG_PIO/Img/3.jpg" alt="serial">
+<img src="file:///C:/Users/User/Desktop/Embedded/Lab10_WDG_PIO/Img/4.jpg" alt="serial"></p>
+<h2 id="%e9%81%87%e5%88%b0%e7%9a%84%e9%97%ae%e9%a2%98%e5%8f%8a%e8%a7%a3%e5%86%b3%e6%96%b9%e6%b3%95">遇到的问题及解决方法</h2>
+<h3 id="1-adc%e8%8e%b7%e5%8f%96%e5%88%b0%e7%9a%84%e5%80%bc%e5%bc%82%e5%b8%b8">1. ADC获取到的值异常</h3>
+<blockquote>
+<p>直接输出ADC1的温度传感器读数原始值时,波动较大,换算后的温度值不符合常理,经查阅资料后发现是采样时间过短导致的. 一开始ADC1的时钟是72MHz,采样时间为1.5个周期. 将ADC时钟调整为4MHz,采样时间设为7.5个周期后,终于读数正常.</p>
+</blockquote>
+<h3 id="2-exti%e4%b8%ad%e8%b0%83%e7%94%a8haldelay%e7%9a%84%e4%bc%98%e5%85%88%e7%ba%a7%e9%97%ae%e9%a2%98">2. EXTI中调用HAL_Delay的优先级问题</h3>
+<blockquote>
+<p>如果按照Cube的默认优先级设置(都为0)是不会有问题的,但是开启WWDG之后如果再在EXTI中调用<code>HAL_Delay</code>的话,会导致无法进入<code>WWDG_Early_Wakeup</code>中断.但即使是调整了优先级,也没有很好的解决问题.最终只能放弃在EXTI中调用<code>HAL_Delay</code>,所以目前按键无法消抖.</p>
+</blockquote>
+
+    </body>
+    </html>
