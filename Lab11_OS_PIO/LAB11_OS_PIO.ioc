@@ -2,7 +2,7 @@
 FREERTOS.FootprintOK=true
 FREERTOS.IPParameters=Tasks01,FootprintOK,Queues01
 FREERTOS.Queues01=myQueue01,16,uint16_t,0,Dynamic,NULL,NULL
-FREERTOS.Tasks01=MsgProducer,0,128,MsgProducerTask,Default,NULL,Dynamic,NULL,NULL;MsgConsumer,0,128,MsgConsumerTask,Default,NULL,Dynamic,NULL,NULL
+FREERTOS.Tasks01=MsgProducer,0,128,MsgProducerTask,Default,NULL,Dynamic,NULL,NULL;MsgConsumer,-1,128,MsgConsumerTask,Default,NULL,Dynamic,NULL,NULL
 File.Version=6
 KeepUserPlacement=false
 Mcu.Family=STM32F1

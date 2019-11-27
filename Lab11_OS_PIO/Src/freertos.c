@@ -25,8 +25,9 @@
 #include "cmsis_os.h"
 
 /* Private includes ----------------------------------------------------------*/
-/* USER CODE BEGIN Includes */
+/* USER CODE BEGIN Includes */     
 #include "string.h"
+// #include "stdio.h"
 /* USER CODE END Includes */
 
 /* Private typedef -----------------------------------------------------------*/
@@ -60,11 +61,30 @@ osMessageQId myQueue01Handle;
 
 /* Private function prototypes -----------------------------------------------*/
 /* USER CODE BEGIN FunctionPrototypes */
+#ifdef __GNUC__
+#define PUTCHAR_PROTO int __io_putchar(int ch)
+#else
+#define PUTCHAR_PROTO int fputc(int ch, FILE *f)
+#endif
+PUTCHAR_PROTO
+{
+  HAL_UART_Transmit(&huart1, (uint8_t *)&ch, 1, 0xffff);
+  return ch;
+}
 
+int _write(int file, char *ptr, int len)
+{
+  int DataIdx;
+  for (DataIdx = 0; DataIdx < len; DataIdx++)
+  {
+    __io_putchar(*ptr++);
+  }
+  return len;
+}
 /* USER CODE END FunctionPrototypes */
 
-void MsgProducerTask(void const *argument);
-void MsgConsumerTask(void const *argument);
+void MsgProducerTask(void const * argument);
+void MsgConsumerTask(void const * argument);
 
 void MX_FREERTOS_Init(void); /* (MISRA C 2004 rule 8.1) */
 
@@ -73,8 +93,7 @@ void MX_FREERTOS_Init(void); /* (MISRA C 2004 rule 8.1) */
   * @param  None
   * @retval None
   */
-void MX_FREERTOS_Init(void)
-{
+void MX_FREERTOS_Init(void) {
   /* USER CODE BEGIN Init */
   HAL_GPIO_WritePin(LED0_GPIO_Port, LED0_Pin, SET);
   /* USER CODE END Init */
@@ -109,12 +128,13 @@ void MX_FREERTOS_Init(void)
   MsgProducerHandle = osThreadCreate(osThread(MsgProducer), NULL);
 
   /* definition and creation of MsgConsumer */
-  osThreadDef(MsgConsumer, MsgConsumerTask, osPriorityNormal, 0, 128);
+  osThreadDef(MsgConsumer, MsgConsumerTask, osPriorityBelowNormal, 0, 128);
   MsgConsumerHandle = osThreadCreate(osThread(MsgConsumer), NULL);
 
   /* USER CODE BEGIN RTOS_THREADS */
   /* add threads, ... */
   /* USER CODE END RTOS_THREADS */
+
 }
 
 /* USER CODE BEGIN Header_MsgProducerTask */
@@ -124,32 +144,28 @@ void MX_FREERTOS_Init(void)
   * @retval None
   */
 /* USER CODE END Header_MsgProducerTask */
-void MsgProducerTask(void const *argument)
+void MsgProducerTask(void const * argument)
 {
+    
+    
+    
 
   /* USER CODE BEGIN MsgProducerTask */
   mailStruct *mail;
-  char msg[20];
+  u_int8_t i = 0;
   /* Infinite loop */
-  for (;;)
+  for (;; ++i)
   {
-    // osDelay(2000);
-    for (int i = 0; i < 7; i++)
+    while (!(mail = (mailStruct *)osMailAlloc(mail01Handle, osWaitForever)))
     {
-      mail = (mailStruct *)osMailAlloc(mail01Handle, osWaitForever);
-      mail->var = i;
-      sprintf(msg, "----Before send %d ", i);
-      HAL_UART_Transmit(&huart1, (uint8_t *)msg, strlen(msg), HAL_MAX_DELAY);
-      sprintf(msg, "After send %d----\n", i);
-      HAL_UART_Transmit(&huart1, (uint8_t *)msg, strlen(msg), HAL_MAX_DELAY);
-      osMailPut(mail01Handle, mail);
-      // osDelay(100);
+      // 如果mail queue已满, 则此时mail为空指针
+      // 等待500ms, 此时系统调度会切换线�?
+      printf("[P]Full! Wait.\n");
+      osDelay(1000);
     }
-
-    // osDelay(1000);
-    // osMessagePut(myQueue01Handle, 2, osWaitForever);
-    // osDelay(2000);
-    // osMessagePut(myQueue01Handle, 4, osWaitForever);
+    mail->var = i;
+    printf("[P]>>%d\n", mail->var);
+    osMailPut(mail01Handle, mail);
   }
   /* USER CODE END MsgProducerTask */
 }
@@ -161,39 +177,32 @@ void MsgProducerTask(void const *argument)
 * @retval None
 */
 /* USER CODE END Header_MsgConsumerTask */
-void MsgConsumerTask(void const *argument)
+void MsgConsumerTask(void const * argument)
 {
   /* USER CODE BEGIN MsgConsumerTask */
   osEvent event;
   mailStruct *pMail;
-  // osEvent event;
-  char msg[20];
 
   /* Infinite loop */
   for (;;)
-  {   
-    osDelay(110);
-    sprintf(msg, "++getting++\r\n");
-    HAL_UART_Transmit(&huart1, (uint8_t *)msg, strlen(msg), HAL_MAX_DELAY);
+  {
+    // 消费者每�?100ms获取�?次消�?
+    // osDelay(100);
     event = osMailGet(mail01Handle, osWaitForever);
     if (event.status == osEventMail)
     {
       pMail = event.value.p;
-      sprintf(msg, "Mail value: %d\r\n", pMail->var);
-      HAL_UART_Transmit(&huart1, (uint8_t *)msg, strlen(msg), HAL_MAX_DELAY);
+      if (!(pMail))
+      {
+        // 如果mail queue为空, 则此时pMail为空指针 
+        // 等待500ms, 此时系统调度会切换线�? 
+        printf("[C]Empty!.\n");
+        osDelay(1000);
+        continue;
+      }
+      printf("[C]%d<<\n", pMail->var);
       osMailFree(mail01Handle, pMail);
     }
-    else{
-      sprintf(msg, "No mail.\r\n");
-      HAL_UART_Transmit(&huart1, (uint8_t *)msg, strlen(msg), HAL_MAX_DELAY);
-    }
-
-    // event = osMessageGet(myQueue01Handle, osWaitForever);
-    // if (event.status == osEventMessage)
-    // {
-    //   sprintf(msg, "Msg value: %d\r\n", (uint16_t)event.value.v);
-    //   HAL_UART_Transmit(&huart1, (uint8_t *)msg, strlen(msg), HAL_MAX_DELAY);
-    // }
   }
   /* USER CODE END MsgConsumerTask */
 }
