@@ -118,10 +118,96 @@
    
 ### **2.使用信号量解决生产者-消费者问题**
 #### 配置
-
+1. 新建一个`CountingSema01`的计数信号量,初始`Count`值设为4.
+#### 代码
+1. `Producer`部分:
+```c
+void MsgProducerTask(void const * argument)
+{
+  /* USER CODE BEGIN MsgProducerTask */
+  u_int8_t i=0;
+  /* Infinite loop */
+  for (;;)
+  {
+    // 不断尝试生产
+    printf("[Producer>] Try produce %d.\n",i);
+    osSemaphoreWait(CountingSem01Handle, osWaitForever);
+    printf("[Producer>] %d produced.\n",i++);
+  }
+  /* USER CODE END MsgProducerTask */
+}
+```
+2. `Consumer`部分:
+```c
+void MsgConsumerTask(void const * argument)
+{
+  /* USER CODE BEGIN MsgConsumerTask */
+  /* Infinite loop */
+  for (;;)
+  {
+    // 每隔1s尝试消费一次
+    osDelay(1000);
+    printf("[>Consumer] Cosumes.\n");
+    osSemaphoreRelease(CountingSem01Handle);
+  }
+  /* USER CODE END MsgConsumerTask */
+}
+```
+#### 结果(串口终端)
+1. `Producer`不断尝试生产, `Consumer`每1s尝试消费一次.
+2. `Producer`尝试生产第5个时, 调用`osSemaphoreWait()`被阻塞.
+3. 调度器切换线程到`Consumer`.
+4. `Consumer`每消费一次后进入`osDelay()`,调度器切换线程.
+5. `Producer`生产一次后又被`osSemaphoreWait()`阻塞,调度器切换线程.
+6. 步骤4和步骤5循环
+```
+[Producer>] Try produce 0.
+[Producer>] 0 produced.
+[Producer>] Try produce 1.
+[Producer>] 1 produced.
+[Producer>] Try produce 2.
+[Producer>] 2 produced.
+[Producer>] Try produce 3.
+[Producer>] 3 produced.
+[Producer>] Try produce 4.
+[>Consumer] Cosumes.
+[Producer>] 4 produced.
+[Producer>] Try produce 5.
+[>Consumer] Cosumes.
+[Producer>] 5 produced.
+[Producer>] Try produce 6.
+[>Consumer] Cosumes.
+[Producer>] 6 produced.
+[Producer>] Try produce 7.
+...
+```
 
 ## 遇到的问题及解决方法
-### 1. ADC获取到的值异常
->直接输出ADC1的温度传感器读数原始值时,波动较大,换算后的温度值不符合常理,经查阅资料后发现是采样时间过短导致的. 一开始ADC1的时钟是72MHz,采样时间为1.5个周期. 将ADC时钟调整为4MHz,采样时间设为7.5个周期后,终于读数正常.
-### 2. EXTI中调用HAL_Delay的优先级问题
->如果按照Cube的默认优先级设置(都为0)是不会有问题的,但是开启WWDG之后如果再在EXTI中调用`HAL_Delay`的话,会导致无法进入`WWDG_Early_Wakeup`中断.但即使是调整了优先级,也没有很好的解决问题.最终只能放弃在EXTI中调用`HAL_Delay`,所以目前按键无法消抖.
+### 1. 尝试使用`printf()`进行串口打印,无输出.
+上次看门狗实验中,只要重载`__io_putchar()`函数即可使用`printf()`在串口打印,但这次串口无输出.  
+打开上次的看门狗实验, 在`__io_putchar()`函数内打断点, 使用st-link进行Debug. 程序运行时于该处暂停, 查看此时的调用堆栈:  
+
+* __io_putchar@0x08000e8e (Src\main.c:78)
+* **_write@0x080010fa (Src\syscalls.c:112)**
+* _write_r@0x08003938 (\_write_r.dbgasm:10)
+* __sflush_r@0x08002bb4 (\__sflush_r.dbgasm:111)
+* __swbuf_r@0x08001d2a (\__swbuf_r.dbgasm:51)
+* __sfputs_r@0x0800364c (\__sfputs_r.dbgasm:14)
+* _vfprintf_r@0x080036b4 (\_vfprintf_r.dbgasm:41)
+* printf ...
+
+对比后发现,如果使用FreeRTOS,那么`Src\syscalls.c`文件并不存在, 故`_wrtie`函数没有实现. 所以需要在这次实验的代码中自己手动实现`_write`函数.  
+观察看门狗实验里`Src\syscalls.c`中的`_write`函数:
+```c
+__attribute__((weak)) int _write(int file, char *ptr, int len)
+{
+	int DataIdx;
+
+	for (DataIdx = 0; DataIdx < len; DataIdx++)
+	{
+		__io_putchar(*ptr++);
+	}
+	return len;
+}
+```
+将其复制到`freertos.c`下,修改修饰符,编译代码并下载到板子上运行,成功在串口输出.

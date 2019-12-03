@@ -1,5 +1,5 @@
 #MicroXplorer Configuration settings - do not modify
-FREERTOS.CountingSemaphores01=CountingSem01,4,Dynamic,NULL
+FREERTOS.CountingSemaphores01=CountingSem01,3,Dynamic,NULL
 FREERTOS.FootprintOK=true
 FREERTOS.IPParameters=Tasks01,FootprintOK,Queues01,configUSE_COUNTING_SEMAPHORES,configTOTAL_HEAP_SIZE,CountingSemaphores01
 FREERTOS.Queues01=myQueue01,16,uint16_t,0,Dynamic,NULL,NULL

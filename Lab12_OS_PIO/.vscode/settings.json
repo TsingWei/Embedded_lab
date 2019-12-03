@@ -3,6 +3,7 @@
         "usart.h": "c",
         "main.h": "c",
         "gpio.h": "c",
-        "cmsis_os.h": "c"
+        "cmsis_os.h": "c",
+        "freertos.h": "c"
     }
 }

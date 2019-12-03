@@ -152,26 +152,14 @@ void MX_FREERTOS_Init(void) {
 /* USER CODE END Header_MsgProducerTask */
 void MsgProducerTask(void const * argument)
 {
-    
-    
-    
-
   /* USER CODE BEGIN MsgProducerTask */
-  mailStruct *mail;
-  u_int8_t i = 0;
+  u_int8_t i=0;
   /* Infinite loop */
-  for (;; ++i)
+  for (;;)
   {
-    while (!(mail = (mailStruct *)osMailAlloc(mail01Handle, osWaitForever)))
-    {
-      // 如果mail queue已满, 则此时mail为空指针
-      // 等待500ms, 此时系统调度会切换线�?
-      printf("[P]Full! Wait.\n");
-      osDelay(1000);
-    }
-    mail->var = i;
-    printf("[P]>>%d\n", mail->var);
-    osMailPut(mail01Handle, mail);
+    printf("[Producer>] Try produce %d.\n",i);
+    osSemaphoreWait(CountingSem01Handle, osWaitForever);
+    printf("[Producer>] %d produced.\n",i++);
   }
   /* USER CODE END MsgProducerTask */
 }
@@ -186,29 +174,12 @@ void MsgProducerTask(void const * argument)
 void MsgConsumerTask(void const * argument)
 {
   /* USER CODE BEGIN MsgConsumerTask */
-  osEvent event;
-  mailStruct *pMail;
-
   /* Infinite loop */
   for (;;)
   {
-    // 消费者每�?100ms获取�?次消�?
-    // osDelay(100);
-    event = osMailGet(mail01Handle, osWaitForever);
-    if (event.status == osEventMail)
-    {
-      pMail = event.value.p;
-      if (!(pMail))
-      {
-        // 如果mail queue为空, 则此时pMail为空指针 
-        // 等待500ms, 此时系统调度会切换线�? 
-        printf("[C]Empty!.\n");
-        osDelay(1000);
-        continue;
-      }
-      printf("[C]%d<<\n", pMail->var);
-      osMailFree(mail01Handle, pMail);
-    }
+    osDelay(1000);
+    printf("[>Consumer] Cosumes.\n");
+    osSemaphoreRelease(CountingSem01Handle);
   }
   /* USER CODE END MsgConsumerTask */
 }

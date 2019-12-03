@@ -1,0 +1,242 @@
+<!DOCTYPE html>
+    <html>
+    <head>
+        <meta charset="UTF-8">
+        <title>实验11~12：FreeRTOS 与 生产者-消费者模型 实验</title>
+        
+        <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/Microsoft/vscode/extensions/markdown-language-features/media/markdown.css">
+        <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/Microsoft/vscode/extensions/markdown-language-features/media/highlight.css">
+        
+        <style>
+.task-list-item { list-style-type: none; } .task-list-item-checkbox { margin-left: -20px; vertical-align: middle; }
+</style>
+        <style>
+            body {
+                font-family: -apple-system, BlinkMacSystemFont, 'Segoe WPC', 'Segoe UI', 'Ubuntu', 'Droid Sans', sans-serif;
+                font-size: 14px;
+                line-height: 1.6;
+            }
+        </style>
+        <style>
+body{ margin: 0 auto; font-family: "Microsoft YaHei", arial,sans-serif; color: #444444; line-height: 1; padding: 30px; } @media screen and (min-width: 768px) { body { width: 748px; margin: 10px auto; } } h1, h2, h3, h4 { color: #111111; font-weight: 400; margin-top: 1em; } h1, h2, h3, h4, h5 { font-family: Georgia, Palatino, serif; } h1, h2, h3, h4, h5, p , dl{ margin-bottom: 16px; padding: 0; } h1 { font-size: 48px; line-height: 54px; } h2 { font-size: 36px; line-height: 42px; } h1, h2 { border-bottom: 1px solid #EFEAEA; padding-bottom: 10px; } h3 { font-size: 24px; line-height: 30px; } h4 { font-size: 21px; line-height: 26px; } h5 { font-size: 18px; list-style: 23px; } a { color: #0099ff; margin: 0; padding: 0; vertical-align: baseline; } a:hover { text-decoration: none; color: #ff6600; } a:visited { /*color: purple;*/ } ul, ol { padding: 0; padding-left: 24px; margin: 0; } li { line-height: 24px; } p, ul, ol { font-size: 16px; line-height: 24px; } ol ol, ul ol { list-style-type: lower-roman; } /*pre { padding: 0px 24px; max-width: 800px; white-space: pre-wrap; } code { font-family: Consolas, Monaco, Andale Mono, monospace; line-height: 1.5; font-size: 13px; }*/ code, pre { border-radius: 3px; background-color:#f7f7f7; color: inherit; } code { font-family: Consolas, Monaco, Andale Mono, monospace; margin: 0 2px; } pre { line-height: 1.7em; overflow: auto; padding: 6px 10px; border-left: 5px solid #6CE26C; } pre > code { border: 0; display: inline; max-width: initial; padding: 0; margin: 0; overflow: initial; line-height: inherit; font-size: .85em; white-space: pre; background: 0 0; } code { color: #666555; } /** markdown preview plus 对于代码块的处理有些问题, 所以使用统一的颜色 */ /*code .keyword { color: #8959a8; } code .number { color: #f5871f; } code .comment { color: #998 }*/ aside { display: block; float: right; width: 390px; } blockquote { border-left:.5em solid #eee; padding: 0 0 0 2em; margin-left:0; } blockquote cite { font-size:14px; line-height:20px; color:#bfbfbf; } blockquote cite:before { content: '\2014 \00A0'; } blockquote p { color: #666; } hr { text-align: left; color: #999; height: 2px; padding: 0; margin: 16px 0; background-color: #e7e7e7; border: 0 none; } dl { padding: 0; } dl dt { padding: 10px 0; margin-top: 16px; font-size: 1em; font-style: italic; font-weight: bold; } dl dd { padding: 0 16px; margin-bottom: 16px; } dd { margin-left: 0; } /* Code below this line is copyright Twitter Inc. */ button, input, select, textarea { font-size: 100%; margin: 0; vertical-align: baseline; *vertical-align: middle; } button, input { line-height: normal; *overflow: visible; } button::-moz-focus-inner, input::-moz-focus-inner { border: 0; padding: 0; } button, input[type="button"], input[type="reset"], input[type="submit"] { cursor: pointer; -webkit-appearance: button; } input[type=checkbox], input[type=radio] { cursor: pointer; } /* override default chrome & firefox settings */ input:not([type="image"]), textarea { -webkit-box-sizing: content-box; -moz-box-sizing: content-box; box-sizing: content-box; } input[type="search"] { -webkit-appearance: textfield; -webkit-box-sizing: content-box; -moz-box-sizing: content-box; box-sizing: content-box; } input[type="search"]::-webkit-search-decoration { -webkit-appearance: none; } label, input, select, textarea { font-family: "Helvetica Neue", Helvetica, Arial, sans-serif; font-size: 13px; font-weight: normal; line-height: normal; margin-bottom: 18px; } input[type=checkbox], input[type=radio] { cursor: pointer; margin-bottom: 0; } input[type=text], input[type=password], textarea, select { display: inline-block; width: 210px; padding: 4px; font-size: 13px; font-weight: normal; line-height: 18px; height: 18px; color: #808080; border: 1px solid #ccc; -webkit-border-radius: 3px; -moz-border-radius: 3px; border-radius: 3px; } select, input[type=file] { height: 27px; line-height: 27px; } textarea { height: auto; } /* grey out placeholders */ :-moz-placeholder { color: #bfbfbf; } ::-webkit-input-placeholder { color: #bfbfbf; } input[type=text], input[type=password], select, textarea { -webkit-transition: border linear 0.2s, box-shadow linear 0.2s; -moz-transition: border linear 0.2s, box-shadow linear 0.2s; transition: border linear 0.2s, box-shadow linear 0.2s; -webkit-box-shadow: inset 0 1px 3px rgba(0, 0, 0, 0.1); -moz-box-shadow: inset 0 1px 3px rgba(0, 0, 0, 0.1); box-shadow: inset 0 1px 3px rgba(0, 0, 0, 0.1); } input[type=text]:focus, input[type=password]:focus, textarea:focus { outline: none; border-color: rgba(82, 168, 236, 0.8); -webkit-box-shadow: inset 0 1px 3px rgba(0, 0, 0, 0.1), 0 0 8px rgba(82, 168, 236, 0.6); -moz-box-shadow: inset 0 1px 3px rgba(0, 0, 0, 0.1), 0 0 8px rgba(82, 168, 236, 0.6); box-shadow: inset 0 1px 3px rgba(0, 0, 0, 0.1), 0 0 8px rgba(82, 168, 236, 0.6); } /* buttons */ button { display: inline-block; padding: 4px 14px; font-family: "Helvetica Neue", Helvetica, Arial, sans-serif; font-size: 13px; line-height: 18px; -webkit-border-radius: 4px; -moz-border-radius: 4px; border-radius: 4px; -webkit-box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.2), 0 1px 2px rgba(0, 0, 0, 0.05); -moz-box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.2), 0 1px 2px rgba(0, 0, 0, 0.05); box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.2), 0 1px 2px rgba(0, 0, 0, 0.05); background-color: #0064cd; background-repeat: repeat-x; background-image: -khtml-gradient(linear, left top, left bottom, from(#049cdb), to(#0064cd)); background-image: -moz-linear-gradient(top, #049cdb, #0064cd); background-image: -ms-linear-gradient(top, #049cdb, #0064cd); background-image: -webkit-gradient(linear, left top, left bottom, color-stop(0%, #049cdb), color-stop(100%, #0064cd)); background-image: -webkit-linear-gradient(top, #049cdb, #0064cd); background-image: -o-linear-gradient(top, #049cdb, #0064cd); background-image: linear-gradient(top, #049cdb, #0064cd); color: #fff; text-shadow: 0 -1px 0 rgba(0, 0, 0, 0.25); border: 1px solid #004b9a; border-bottom-color: #003f81; -webkit-transition: 0.1s linear all; -moz-transition: 0.1s linear all; transition: 0.1s linear all; border-color: #0064cd #0064cd #003f81; border-color: rgba(0, 0, 0, 0.1) rgba(0, 0, 0, 0.1) rgba(0, 0, 0, 0.25); } button:hover { color: #fff; background-position: 0 -15px; text-decoration: none; } button:active { -webkit-box-shadow: inset 0 3px 7px rgba(0, 0, 0, 0.15), 0 1px 2px rgba(0, 0, 0, 0.05); -moz-box-shadow: inset 0 3px 7px rgba(0, 0, 0, 0.15), 0 1px 2px rgba(0, 0, 0, 0.05); box-shadow: inset 0 3px 7px rgba(0, 0, 0, 0.15), 0 1px 2px rgba(0, 0, 0, 0.05); } button::-moz-focus-inner { padding: 0; border: 0; } table { *border-collapse: collapse; /* IE7 and lower */ border-spacing: 0; width: 100%; } table { border: solid #ccc 1px; -moz-border-radius: 6px; -webkit-border-radius: 6px; border-radius: 6px; /*-webkit-box-shadow: 0 1px 1px #ccc; -moz-box-shadow: 0 1px 1px #ccc; box-shadow: 0 1px 1px #ccc; */ } table tr:hover { background: #fbf8e9; -o-transition: all 0.1s ease-in-out; -webkit-transition: all 0.1s ease-in-out; -moz-transition: all 0.1s ease-in-out; -ms-transition: all 0.1s ease-in-out; transition: all 0.1s ease-in-out; } table td, .table th { border-left: 1px solid #ccc; border-top: 1px solid #ccc; padding: 10px; text-align: left; } table th { background-color: #dce9f9; background-image: -webkit-gradient(linear, left top, left bottom, from(#ebf3fc), to(#dce9f9)); background-image: -webkit-linear-gradient(top, #ebf3fc, #dce9f9); background-image: -moz-linear-gradient(top, #ebf3fc, #dce9f9); background-image: -ms-linear-gradient(top, #ebf3fc, #dce9f9); background-image: -o-linear-gradient(top, #ebf3fc, #dce9f9); background-image: linear-gradient(top, #ebf3fc, #dce9f9); /*-webkit-box-shadow: 0 1px 0 rgba(255,255,255,.8) inset; -moz-box-shadow:0 1px 0 rgba(255,255,255,.8) inset; box-shadow: 0 1px 0 rgba(255,255,255,.8) inset;*/ border-top: none; text-shadow: 0 1px 0 rgba(255,255,255,.5); padding: 5px; } table td:first-child, table th:first-child { border-left: none; } table th:first-child { -moz-border-radius: 6px 0 0 0; -webkit-border-radius: 6px 0 0 0; border-radius: 6px 0 0 0; } table th:last-child { -moz-border-radius: 0 6px 0 0; -webkit-border-radius: 0 6px 0 0; border-radius: 0 6px 0 0; } table th:only-child{ -moz-border-radius: 6px 6px 0 0; -webkit-border-radius: 6px 6px 0 0; border-radius: 6px 6px 0 0; } table tr:last-child td:first-child { -moz-border-radius: 0 0 0 6px; -webkit-border-radius: 0 0 0 6px; border-radius: 0 0 0 6px; } table tr:last-child td:last-child { -moz-border-radius: 0 0 6px 0; -webkit-border-radius: 0 0 6px 0; border-radius: 0 0 6px 0; }
+</style>
+        
+    </head>
+    <body class="vscode-light">
+        <h1 id="%e5%ae%9e%e9%aa%8c1112freertos-%e4%b8%8e-%e7%94%9f%e4%ba%a7%e8%80%85-%e6%b6%88%e8%b4%b9%e8%80%85%e6%a8%a1%e5%9e%8b-%e5%ae%9e%e9%aa%8c">实验11~12：FreeRTOS 与 生产者-消费者模型 实验</h1>
+<p>11610101 韦青茂</p>
+<h2 id="%e5%ae%9e%e9%aa%8c%e5%99%a8%e6%9d%90">实验器材</h2>
+<ul>
+<li>硬件：ARM-STM32开发板，ST-Link。</li>
+<li>软件：Win10, CubeMX, PlatformIO via VSCode</li>
+</ul>
+<h2 id="%e5%ae%9e%e9%aa%8c%e8%a6%81%e6%b1%82">实验要求</h2>
+<ol>
+<li>Finish the practice of the last lab: Using counting semaphore to solve the producer-consumer problem</li>
+<li>Using mail queues to solve the producer-consumer problem</li>
+<li>The buffer size of the producer-consumer problem is 4</li>
+</ol>
+<h2 id="%e5%ae%9e%e9%aa%8c%e8%bf%87%e7%a8%8b">实验过程</h2>
+<h3 id="1%e4%bd%bf%e7%94%a8mail-queue%e8%a7%a3%e5%86%b3%e7%94%9f%e4%ba%a7%e8%80%85-%e6%b6%88%e8%b4%b9%e8%80%85%e9%97%ae%e9%a2%98"><strong>1.使用<code>Mail Queue</code>解决生产者-消费者问题</strong></h3>
+<h4 id="%e9%85%8d%e7%bd%ae">配置</h4>
+<ol>
+<li><code>Producer</code>优先级为<code>Normal</code>,<br>
+<code>Consumer</code>优先级为<code>BelowNormal</code>.</li>
+<li><code>MailQueue</code>大小为4:<pre><code class="language-c"><div>osMailQDef(mail01, <span class="hljs-number">4</span>, mailStruct);
+mail01Handle = osMailCreate(osMailQ(mail01), <span class="hljs-literal">NULL</span>);
+</div></code></pre>
+</li>
+</ol>
+<h4 id="%e4%bb%a3%e7%a0%81">代码</h4>
+<ol>
+<li><code>Producer</code>部分:<pre><code class="language-c"><div><span class="hljs-function"><span class="hljs-keyword">void</span> <span class="hljs-title">MsgProducerTask</span><span class="hljs-params">(<span class="hljs-keyword">void</span> <span class="hljs-keyword">const</span> *argument)</span>
+</span>{
+<span class="hljs-comment">/* USER CODE BEGIN MsgProducerTask */</span>
+mailStruct *mail;
+<span class="hljs-keyword">u_int8_t</span> i = <span class="hljs-number">0</span>;
+<span class="hljs-comment">/* Infinite loop */</span>
+<span class="hljs-keyword">for</span> (;; ++i)
+{
+    <span class="hljs-keyword">while</span> (!(mail = (mailStruct *)osMailAlloc(mail01Handle, osWaitForever)))
+    {
+    <span class="hljs-comment">// 如果mail queue已满, 则此时mail为空指针</span>
+    <span class="hljs-comment">// 等待500ms, 此时系统调度会切换线程</span>
+    <span class="hljs-built_in">printf</span>(<span class="hljs-string">"[P]Full! Wait.\n"</span>);
+    osDelay(<span class="hljs-number">500</span>);
+    }
+    <span class="hljs-comment">// 向mail queue中发送一则消息</span>
+    mail-&gt;var = i;
+    <span class="hljs-built_in">printf</span>(<span class="hljs-string">"[P]&gt;&gt;%d\n"</span>, mail-&gt;var);
+    osMailPut(mail01Handle, mail);
+}
+<span class="hljs-comment">/* USER CODE END MsgProducerTask */</span>
+}
+</div></code></pre>
+</li>
+<li><code>Consumer</code>部分:<pre><code class="language-c"><div><span class="hljs-function"><span class="hljs-keyword">void</span> <span class="hljs-title">MsgConsumerTask</span><span class="hljs-params">(<span class="hljs-keyword">void</span> <span class="hljs-keyword">const</span> *argument)</span>
+</span>{
+<span class="hljs-comment">/* USER CODE BEGIN MsgConsumerTask */</span>
+osEvent event;
+mailStruct *pMail;
+
+<span class="hljs-comment">/* Infinite loop */</span>
+<span class="hljs-keyword">for</span> (;;)
+{
+    <span class="hljs-comment">// 消费者每隔100ms尝试获取一次消息</span>
+    osDelay(<span class="hljs-number">100</span>);
+    event = osMailGet(mail01Handle, osWaitForever);
+    <span class="hljs-keyword">if</span> (event.status == osEventMail)
+    {
+    <span class="hljs-keyword">if</span> (!(pMail = event.value.p))
+    {
+        <span class="hljs-comment">// 如果mail queue为空, 则此时pMail为空指针 </span>
+        <span class="hljs-comment">// 等待500ms, 此时系统调度会切换线程 </span>
+        <span class="hljs-built_in">printf</span>(<span class="hljs-string">"[C]Empty!.\n"</span>);
+        osDelay(<span class="hljs-number">500</span>);
+        <span class="hljs-keyword">continue</span>;
+    }
+    <span class="hljs-built_in">printf</span>(<span class="hljs-string">"[C]%d&lt;&lt;\n"</span>, pMail-&gt;var);
+    osMailFree(mail01Handle, pMail);
+    }
+}
+<span class="hljs-comment">/* USER CODE END MsgConsumerTask */</span>
+}
+</div></code></pre>
+</li>
+</ol>
+<h4 id="%e7%bb%93%e6%9e%9c%e4%b8%b2%e5%8f%a3%e7%bb%88%e7%ab%af">结果(串口终端)</h4>
+<ol>
+<li><code>Producer</code>每次塞入四条消息后, 被阻塞, 此时调度器切换到<code>Consumer</code>, 接收四条消息.</li>
+<li>当<code>Consumer</code>消化完4条信息后,再一次调用<code>osMailGet(mail01Handle, osWaitForever)</code>时,调度器会切换线程到<code>Producer</code>.</li>
+</ol>
+<pre><code><div>...
+[C]120&lt;&lt;
+[C]121&lt;&lt;
+[C]122&lt;&lt;
+[C]123&lt;&lt;
+[P]&gt;&gt;124
+[P]&gt;&gt;125
+[P]&gt;&gt;126
+[P]&gt;&gt;127
+[P]Full! Wait.
+[C]124&lt;&lt;
+[C]125&lt;&lt;
+[C]126&lt;&lt;
+[C]127&lt;&lt;
+[P]&gt;&gt;128
+[P]&gt;&gt;129
+[P]&gt;&gt;130
+[P]&gt;&gt;131
+[P]Full! Wait.
+[C]128&lt;&lt;
+[C]129&lt;&lt;
+[C]130&lt;&lt;
+[C]131&lt;&lt;
+[P]&gt;&gt;132
+[P]&gt;&gt;133
+[P]&gt;&gt;134
+[P]&gt;&gt;135
+[P]Full! Wait.
+...
+</div></code></pre>
+<h3 id="2%e4%bd%bf%e7%94%a8%e4%bf%a1%e5%8f%b7%e9%87%8f%e8%a7%a3%e5%86%b3%e7%94%9f%e4%ba%a7%e8%80%85-%e6%b6%88%e8%b4%b9%e8%80%85%e9%97%ae%e9%a2%98"><strong>2.使用信号量解决生产者-消费者问题</strong></h3>
+<h4 id="%e9%85%8d%e7%bd%ae-1">配置</h4>
+<ol>
+<li>新建一个<code>CountingSema01</code>的计数信号量,初始<code>Count</code>值设为4.</li>
+</ol>
+<h4 id="%e4%bb%a3%e7%a0%81-1">代码</h4>
+<ol>
+<li><code>Producer</code>部分:</li>
+</ol>
+<pre><code class="language-c"><div><span class="hljs-function"><span class="hljs-keyword">void</span> <span class="hljs-title">MsgProducerTask</span><span class="hljs-params">(<span class="hljs-keyword">void</span> <span class="hljs-keyword">const</span> * argument)</span>
+</span>{
+  <span class="hljs-comment">/* USER CODE BEGIN MsgProducerTask */</span>
+  <span class="hljs-keyword">u_int8_t</span> i=<span class="hljs-number">0</span>;
+  <span class="hljs-comment">/* Infinite loop */</span>
+  <span class="hljs-keyword">for</span> (;;)
+  {
+    <span class="hljs-comment">// 不断尝试生产</span>
+    <span class="hljs-built_in">printf</span>(<span class="hljs-string">"[Producer&gt;] Try produce %d.\n"</span>,i);
+    osSemaphoreWait(CountingSem01Handle, osWaitForever);
+    <span class="hljs-built_in">printf</span>(<span class="hljs-string">"[Producer&gt;] %d produced.\n"</span>,i++);
+  }
+  <span class="hljs-comment">/* USER CODE END MsgProducerTask */</span>
+}
+</div></code></pre>
+<ol start="2">
+<li><code>Consumer</code>部分:</li>
+</ol>
+<pre><code class="language-c"><div><span class="hljs-function"><span class="hljs-keyword">void</span> <span class="hljs-title">MsgConsumerTask</span><span class="hljs-params">(<span class="hljs-keyword">void</span> <span class="hljs-keyword">const</span> * argument)</span>
+</span>{
+  <span class="hljs-comment">/* USER CODE BEGIN MsgConsumerTask */</span>
+  <span class="hljs-comment">/* Infinite loop */</span>
+  <span class="hljs-keyword">for</span> (;;)
+  {
+    <span class="hljs-comment">// 每隔1s尝试消费一次</span>
+    osDelay(<span class="hljs-number">1000</span>);
+    <span class="hljs-built_in">printf</span>(<span class="hljs-string">"[&gt;Consumer] Cosumes.\n"</span>);
+    osSemaphoreRelease(CountingSem01Handle);
+  }
+  <span class="hljs-comment">/* USER CODE END MsgConsumerTask */</span>
+}
+</div></code></pre>
+<h4 id="%e7%bb%93%e6%9e%9c%e4%b8%b2%e5%8f%a3%e7%bb%88%e7%ab%af-1">结果(串口终端)</h4>
+<ol>
+<li><code>Producer</code>不断尝试生产, <code>Consumer</code>每1s尝试消费一次.</li>
+<li><code>Producer</code>尝试生产第5个时, 调用<code>osSemaphoreWait()</code>被阻塞.</li>
+<li>调度器切换线程到<code>Consumer</code>.</li>
+<li><code>Consumer</code>每消费一次后进入<code>osDelay()</code>,调度器切换线程.</li>
+<li><code>Producer</code>生产一次后又被<code>osSemaphoreWait()</code>阻塞,调度器切换线程.</li>
+<li>步骤4和步骤5循环</li>
+</ol>
+<pre><code><div>[Producer&gt;] Try produce 0.
+[Producer&gt;] 0 produced.
+[Producer&gt;] Try produce 1.
+[Producer&gt;] 1 produced.
+[Producer&gt;] Try produce 2.
+[Producer&gt;] 2 produced.
+[Producer&gt;] Try produce 3.
+[Producer&gt;] 3 produced.
+[Producer&gt;] Try produce 4.
+[&gt;Consumer] Cosumes.
+[Producer&gt;] 4 produced.
+[Producer&gt;] Try produce 5.
+[&gt;Consumer] Cosumes.
+[Producer&gt;] 5 produced.
+[Producer&gt;] Try produce 6.
+[&gt;Consumer] Cosumes.
+[Producer&gt;] 6 produced.
+[Producer&gt;] Try produce 7.
+...
+</div></code></pre>
+<h2 id="%e9%81%87%e5%88%b0%e7%9a%84%e9%97%ae%e9%a2%98%e5%8f%8a%e8%a7%a3%e5%86%b3%e6%96%b9%e6%b3%95">遇到的问题及解决方法</h2>
+<h3 id="1-%e5%b0%9d%e8%af%95%e4%bd%bf%e7%94%a8printf%e8%bf%9b%e8%a1%8c%e4%b8%b2%e5%8f%a3%e6%89%93%e5%8d%b0%e6%97%a0%e8%be%93%e5%87%ba">1. 尝试使用<code>printf()</code>进行串口打印,无输出.</h3>
+<p>上次看门狗实验中,只要重载<code>__io_putchar()</code>函数即可使用<code>printf()</code>在串口打印,但这次串口无输出.<br>
+打开上次的看门狗实验, 在<code>__io_putchar()</code>函数内打断点, 使用st-link进行Debug. 程序运行时于该处暂停, 查看此时的调用堆栈:</p>
+<ul>
+<li>__io_putchar@0x08000e8e (Src\main.c:78)</li>
+<li><strong>_write@0x080010fa (Src\syscalls.c:112)</strong></li>
+<li>_write_r@0x08003938 (_write_r.dbgasm:10)</li>
+<li>__sflush_r@0x08002bb4 (__sflush_r.dbgasm:111)</li>
+<li>__swbuf_r@0x08001d2a (__swbuf_r.dbgasm:51)</li>
+<li>__sfputs_r@0x0800364c (__sfputs_r.dbgasm:14)</li>
+<li>_vfprintf_r@0x080036b4 (_vfprintf_r.dbgasm:41)</li>
+<li>printf ...</li>
+</ul>
+<p>对比后发现,如果使用FreeRTOS,那么<code>Src\syscalls.c</code>文件并不存在, 故<code>_wrtie</code>函数没有实现. 所以需要在这次实验的代码中自己手动实现<code>_write</code>函数.<br>
+观察看门狗实验里<code>Src\syscalls.c</code>中的<code>_write</code>函数:</p>
+<pre><code class="language-c"><div>__attribute__((weak)) <span class="hljs-keyword">int</span> _write(<span class="hljs-keyword">int</span> file, <span class="hljs-keyword">char</span> *ptr, <span class="hljs-keyword">int</span> len)
+{
+	<span class="hljs-keyword">int</span> DataIdx;
+
+	<span class="hljs-keyword">for</span> (DataIdx = <span class="hljs-number">0</span>; DataIdx &lt; len; DataIdx++)
+	{
+		__io_putchar(*ptr++);
+	}
+	<span class="hljs-keyword">return</span> len;
+}
+</div></code></pre>
+<p>将其复制到<code>freertos.c</code>下,修改修饰符,编译代码并下载到板子上运行,成功在串口输出.</p>
+
+    </body>
+    </html>
